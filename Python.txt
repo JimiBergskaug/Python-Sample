@@ -1,0 +1,514 @@
+
+#### Regression
+
+#### Student Task. Scatter Plots.
+
+from matplotlib import pyplot as plt 
+
+def studentScatterPlot(X, y):
+    fig, axes = plt.subplots(1, 1, figsize=(8, 4))
+    ### STUDENT TASK ###
+    # get the correct feature from X and save to X_4
+    X_4 = X[:,3]
+    # use X_4 to create the scatter plot
+    axes.scatter(X_4,y)
+    # YOUR CODE HERE
+    
+    axes.set_title('feature $x_{4}$ vs. label $y$')
+    axes.set_xlabel(r'$x_{4}$')
+    axes.set_ylabel('$y$')
+    return X_4, axes
+
+X,y = GetFeaturesLabels(10,10)   # read in features and labels
+
+axes = studentScatterPlot(X, y)
+plt.show()
+
+###### Tehtävä loppu 
+
+##### Student Task Varying Number of Features.
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+
+# we use m data points (each data point representing an uncorrupted pixel) 
+m = 10   
+# maximum number of features used 
+max_r = 10                        
+
+# read in m data points using max_r features 
+X, y = GetFeaturesLabels(m, max_r) 
+  
+# vector for storing the training error of LinearRegresion.fit() for each r
+linreg_error = np.zeros(max_r)    
+
+### STUDENT TASK ###
+reg = LinearRegression(fit_intercept=False)
+
+# YOUR CODE HERE
+
+for i in range(max_r):
+    
+    reg = reg.fit(X[:,:i+1],y)
+    y_pred = reg.predict(X[:,:i+1])
+    training_error = mean_squared_error(y,y_pred)
+    linreg_error[i]=training_error
+
+# create a numpy array "r_values" containing the values 1,2...,max_r 
+r_values = np.linspace(1, max_r, max_r, endpoint=True)
+# create a plot object which can be accessed using variables "fig" and "axes"
+fig, axes = plt.subplots(1,1, figsize=(8, 5))
+# add a curve representing the average squared error for each choice of r 
+axes.plot(r_values, linreg_error, label='MSE', color='red')
+# add captions for the horizontal and vertical axes 
+axes.set_xlabel('features')
+axes.set_ylabel('empirical error')
+# add a title to the plot 
+axes.set_title('Training error vs number of features')
+axes.legend()
+plt.tight_layout()
+# display the plot 
+plt.show()
+
+#### tehtävä loppu
+
+###### Student Task. Varying Number of Data Points.
+
+# maximum number of data points 
+max_m = 10     
+
+# read in max_m data points using n=2 features 
+X, y = GetFeaturesLabels(max_m, 2)   
+
+# create numpy array "train_error" for storing the average squared 
+# error for each choice of number of data points, i.e., 
+# train_error[0] is the average error for m=1 labeled data points, 
+# train_error[1] is the average error for m=2 labeled data points, 
+# ... 
+# train_error[max_m-1] is the average error for m=m_max labeled data points
+train_error = np.zeros(max_m)         
+
+### STUDENT TASK ###
+# train_error = ... 
+# Hint: loop "max_m" times.
+
+reg = LinearRegression(fit_intercept=False)
+
+for i in range(max_m):
+    X_i = X[:i+1]
+    y_i = y[:i+1]
+    reg =reg.fit(X_i,y_i)
+    y_pred = reg.predict(X_i)
+    training_error = mean_squared_error(y_i,y_pred)
+    train_error[i] = training_error
+
+
+# create a numpy array "m_values" containing the values 1,2...,max_m
+m_values = np.linspace(1, max_m, max_m, endpoint=True)
+# create a plot object which can be accessed using variables "fig" and "axes"
+fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(8, 4))
+# add a curve representing the average squared error for each choice of r
+axes.plot(m_values, train_error, label='MSE', color='red')
+# add captions for axes of the plot 
+axes.set_xlabel('number of data points (sample size)')
+axes.set_ylabel('training error')
+# add title for the plot 
+axes.set_title('training error vs. number of data points')
+axes.legend()
+plt.tight_layout()
+# display the plot 
+plt.show()
+
+#### tehtävä loppu
+
+### Student Task Choosing the optimal epsilon for HuberRegressor
+
+from sklearn import linear_model
+from sklearn.linear_model import HuberRegressor
+
+# read in 10 data points with single feature x_1 and label y 
+X,y = GetFeaturesLabels(10,1)  
+
+# create a numpy array with the values for the paramter c 
+
+epsilon_vals = [1,1.2,1.4,1.6,1.8,2]
+vals = len(epsilon_vals)
+err_vs_epsilon = np.zeros(vals)
+
+# create a numpy array "y_perturbed" by copying the values of the 
+# numpy array "y" which contains the label values of the data points 
+y_perturbed = np.copy(y)  
+
+# now we intentionaly perturb the label of the first data point 
+# by setting it to 10000
+y_perturbed[0] = 10000;
+
+### STUDENT TASK ###
+for epsilon in range(vals):
+    reg = HuberRegressor(epsilon_vals[epsilon]).fit(X,y_perturbed.ravel())
+    y_pred = reg.predict(X[1:])
+    training_error = mean_squared_error(y[1:],y_pred)
+    err_vs_epsilon[epsilon] = training_error
+
+# Print errors
+
+print('Errors:')
+
+print(err_vs_epsilon)
+
+################# tehtävän loppu
+
+### Round 3
+### Student Task. Feature Matrix
+
+def feature_matrix():
+    """
+    Generate a feature matrix representing different descriptive statistics of an image in the dataset.
+
+    :return: array-like, shape=(m, n), feature-matrix with n features for each of m images. """  
+    
+    file = "/coursedata/R3_Classification/image_data.csv"   
+    
+    X = pd.read_csv(file, header = None)
+    X_scaled = preprocessing.scale(X)
+    
+  
+    
+    return X_scaled
+
+### tehtävä loppuu
+
+### Student Task. Label Vector
+
+def labels():
+    """ 
+    :return: array-like, shape=(m,), label-vector
+    """    
+    file = "/coursedata/R3_Classification/image_labels.csv"
+    label_data = pd.read_csv(file, header = None)
+    label_binary = np.copy(label_data)
+    
+    for i in range(len(label_binary)):
+        if label_binary[i] > 0:
+            label_binary[i] = 0
+        else:
+            label_binary[i] = 1
+    
+    y = label_binary.reshape(178)
+    
+    return y
+
+### tehtävä loppuu
+
+### Student Task. Logistic vs. Squared Error Loss
+
+
+from sklearn.metrics import mean_squared_error
+
+# define sigmoid function according to formula (5)
+def sigmoid_func(x):
+    return 1/(1 + np.exp(-x))
+
+# Choose values (w^T*x) for calculating loss 
+range_x = np.arange(-2 , 4 , 0.01)
+
+# array for y=1
+y = np.ones(len(range_x))
+
+# Calculate logistic loss for y=1
+logloss_y1 = -np.log(sigmoid_func(range_x))
+
+
+squaredloss_y1 = (y-range_x)**2
+
+
+# Font sizes for matplotlib
+plt.rc('legend', fontsize=12) 
+plt.rc('axes', labelsize=16) 
+plt.rc('xtick', labelsize=12) 
+plt.rc('ytick', labelsize=12) 
+
+# Plot the results
+# IMPORTANT!: Please don't change below code for plotting, else the tests will fail and you will lose points
+fig, axes = plt.subplots(1, 1, figsize=(10, 6))
+axes.plot(range_x, logloss_y1, linestyle=':', label=r'logistic loss $y=1$', linewidth=3.0)
+axes.plot(range_x, squaredloss_y1/2, label=r'squared error for $y=1$', linewidth=2.0)
+
+# Set axes label and legend
+axes.set_xlabel(r'$\mathbf{w}^{T}\mathbf{x}$')
+axes.set_ylabel(r'$\mathcal{L}((y,\mathbf{x});\mathbf{w})$')
+axes.legend()
+plt.show()
+
+### tehtävä loppuu
+
+### Student Task. Logistic Regression
+
+# Load the features and labels
+X = feature_matrix()
+y = labels() 
+
+### BEGIN STUDENT TASK ###
+log_reg = LogisticRegression(random_state=0, C=1e6)
+log_reg = log_reg.fit(X,y)
+y_pred = log_reg.predict(X)
+
+### tehtävä loppuu
+
+### Student Task. Compute Accuracy.
+
+errors = np.count_nonzero(arr != 0) 
+def calculate_accuracy(y, y_hat):
+    """
+    Calculate accuracy of your prediction
+    
+    :param y: array-like, shape=(m,), correct label vector
+    :param y_hat: array-like, shape=(m,), label-vector prediction
+    
+    :return: scalar-like, percentual accuracy of your prediction
+    """
+    accuracy = np.count_nonzero(y-y_hat==0)/len(y)*100
+    
+    return accuracy
+
+### tehtävä loppuu
+
+### Student Task. Confidence in Classifications.
+
+# Predict the probabilities
+X = feature_matrix()
+y = pd.read_csv("/coursedata/R3_Classification/image_labels.csv", header=None).to_numpy()
+y = y.reshape(-1)
+
+log_reg = LogisticRegression(random_state=0, multi_class="ovr")
+log_reg = log_reg.fit(X, y)
+
+y_probs = log_reg.predict_proba(X)
+
+# Show the predicted probabilities of the first five data points
+print('First five samples and their probabilities of belonging to classes 0, 1 and 2:')
+for i in range(5):
+    print(f"Probabilities of Sample {i+1}: Class 0: {round(100*y_probs[i][0],2)}%, Class 1: {round(100*y_probs[i][1],2)}%, Class 2: {round(100*y_probs[i][2],2)}%")
+
+n_discarded = np.count_nonzero(np.max(y_probs,axis = 1)<0.9)
+
+print('Number of discarded samples:', n_discarded)
+
+### tehtävä loppu
+
+### Student Task. Decision Tree Classifier.
+
+# Load data to feature matrix X and label vector y 
+X = feature_matrix()
+y = pd.read_csv("/coursedata/R3_Classification/image_labels.csv", header = None).to_numpy()
+y = y.reshape(-1)
+feature_cols = ["x" + str(i) for i in range(len(X[0,:]))] # needed for visualization
+
+### STUDENT TASK ###
+clf = DecisionTreeClassifier(random_state=0, criterion='entropy')
+clf = clf.fit(X,y)
+y_pred = clf.predict(X)
+accuracy = calculate_accuracy(y,y_pred)/100
+
+# Model Accuracy, how often is the classifier correct?
+print("Accuracy:", round(100*accuracy, 2), '%')
+
+### tehtävä loppu
+
+### Student Task. Confusion Matrix.
+
+# Define class names and title for confusion matrix
+classes = ['Class 0','Class 1','Class 2']
+title = "Confusion matrix, without normalization"
+
+fig, axes = plt.subplots(1, 1, figsize=(8, 5)) 
+
+options =[(title,None,0)]
+
+disp = plot_confusion_matrix(clf,X,y,display_labels=classes, cmap=plt.cm.Blues, ax = axes)
+disp .ax_.set_title(title)
+cm = disp.confusion_matrix
+
+print(title)
+print(cm)
+
+plt.show()
+
+### tehtävä loppu
+
+#### Take Home Quiz
+#1) 4
+#2) 3
+#3) 1
+#4) 2
+
+################################################
+################################################
+################################################
+
+
+Student Task. Generate Training and Validation Set.
+
+
+from sklearn.model_selection import train_test_split    # Import train_test_split function
+
+m = 20    # we use the first m=20 data points (pixels) from the aerial photo
+n = 10    # maximum number of features used 
+
+X, y = GetFeaturesLabels(m,n)    # read in m data points using n features 
+
+### STUDENT TASK ###
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=2) 
+
+
+################################################
+################################################
+################################################
+
+Student Task. Compute Training and Validation Error.
+def get_train_val_errors(X_train, X_val, y_train, y_val, n_features):  
+    err_train = np.zeros((n,1))    # Array for storing training errors
+    err_val = np.zeros((n,1))    # Array for storing validation errors
+    
+    for r_minus_1 in range(n_features):    # Loop over the number of features r (minus one)
+        ### STUDENT TASK ###
+        reg = LinearRegression(fit_intercept=False)
+        reg = reg.fit(X_train[:,:(r_minus_1 + 1)], y_train)
+        pred_train = reg.predict(X_train[:,:(r_minus_1 + 1)])
+        err_train[r_minus_1] = mean_squared_error(y_train, pred_train)
+        pred_val = reg.predict(X_val[:,:(r_minus_1 + 1)])
+        err_val[r_minus_1] = mean_squared_error(y_val,pred_val)
+    return err_train, err_val
+
+   
+
+def get_best_model(err_val):
+    best_model =np.argmin(err_val)
+    return best_model
+
+################################################
+################################################
+################################################
+
+Student task. 5-Fold Cross Validation.
+
+m = 20    # we use the first m=20 data points (pixels) from the aerial photo 
+n = 10
+
+X, y = GetFeaturesLabels(m,n)  # read in m data points with n features 
+
+err_train = np.zeros(n)  # Array to store training errors
+err_val = np.zeros(n)  # Array to store validation errors
+
+K = 5
+kf = KFold(n_splits=K, shuffle=False)    # Create a KFold object with 'K' splits
+
+for r_minus_1 in range(n):
+    train_errors_per_cv_iteration = []  # List for storing the training errors for the splits
+    val_errors_per_cv_iteration = []  # List for storing the validation errors for the splits
+    
+    for train_indices, test_indices in kf.split(X):     
+        X_train = X[train_indices,:]    
+        y_train = y[train_indices,:]
+        X_val = X[test_indices,:]    
+        y_val = y[test_indices,:]
+        reg = LinearRegression(fit_intercept=False)
+        reg = reg.fit(X_train[:,:(r_minus_1 + 1)], y_train)
+        pred_train = reg.predict(X_train[:,:(r_minus_1 + 1)])
+                                 
+        t_err = mean_squared_error(y_train, pred_train)
+                                 
+        train_errors_per_cv_iteration.append(t_err)
+        pred_val = reg.predict(X_val[:,:(r_minus_1 + 1)])
+        val_errors_per_cv_iteration.append(mean_squared_error(y_val,pred_val))
+    
+    err_train[r_minus_1] = np.mean(train_errors_per_cv_iteration)
+    err_val[r_minus_1 ] = np.mean(val_errors_per_cv_iteration)
+    
+
+    
+print('Training errors for each K:')
+print(err_train, '\n')
+print('Validation error for each K:')
+print(err_val, '\n')
+
+################################################
+################################################
+################################################
+
+Student Task. Lasso Regression.
+
+from sklearn.linear_model import Lasso
+
+X,y = GetFeaturesLabels(m,n)    # read in m data points using n features 
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=2)    # 80% training and 20% test
+
+def fit_lasso(X_train, y_train, alpha_val):
+    reg = Lasso(alpha = alpha_val, fit_intercept = False)
+    reg.fit(X_train, y_train)
+    y_pred = reg.predict(X_train)
+    w_opt = reg.coef_
+    training_error = mean_squared_error(y_pred,y_train)
+                                        
+    return w_opt, training_error
+
+
+################################################
+################################################
+################################################
+
+Student Task. Tuning Lasso Parameter.
+
+def lasso_param_search(X_train, X_val, y_train, y_val, alpha_values):
+    n_values = len(alpha_values)    # The number of candidate values for 'alpha'
+    err_train = np.zeros([n_values,1])    # Array for training errors
+    err_val = np.zeros([n_values,1])    # Array for validation errors
+    
+    ### STUDENT TASK ###
+    # Pseudocode:
+    # -For each alpha in alpha_values:
+    #   -fit a lasso model on the training data
+    #   -calculate and store training and validation errors
+    # -Find the best alpha (i.e. the one with the lowest validation error)
+    # -Calculate/retrieve the optimal weights (coefficients) corresponding to this alpha
+    # YOUR CODE HERE
+    
+    for i in range(n_values):
+        lasso = Lasso(alpha = alpha_values[i], fit_intercept = False)
+        lasso.fit(X_train, y_train)
+        pred_y = lasso.predict(X_train)
+        err_train[i] = mean_squared_error(pred_y,y_train)
+        pred_y_val = lasso.predict(X_val)
+        err_val[i] = mean_squared_error(pred_y_val, y_val)
+        if err_val[i]<err_val[i-1]:
+            w_opt = lasso.coef_
+        
+    
+    
+    return w_opt, err_train, err_val
+
+################################################
+################################################
+################################################
+
+answer_R4_Q1  = 1
+answer_R4_Q2  =2
+answer_R4_Q3  = 2
+
+#######
+alpha_values = np.array([0.01, 0.05, 0.2, 1, 3, 10, 1e2, 1e3])
+
+
+w_opt, train_err, val_err = lasso_param_search(X_train, X_val, y_train, y_val, alpha_values)
+print(alpha_values[np.argmin(val_err)])
+
+answer_R4_Q4  = alpha_values[np.argmin(val_err)]
+
+######
+
+################################################
+################################################
+################################################
+
+
+
